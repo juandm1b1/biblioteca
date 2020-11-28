@@ -1,0 +1,70 @@
+{% extends 'index.html' %}
+{% load staticfiles %}
+{% block titulo %}
+Biblioteca.dev | Listado de Libros
+{% endblock titulo %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/lib/datatable/dataTables.bootstrap.min.css' %}">
+{% endblock extra_css %}
+{% block body %}
+<div class="card">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-8">
+        <strong class="card-title">Listado de Libros</strong>
+      </div>
+      <div class="col-md-4">
+        <a href="{% url 'libro:crear_libro' %}" class="btn btn-primary">REGISTRAR LIBRO</a>        
+      </div>
+    </div>
+
+  </div>
+  <div class="table-stats order-table ov-h">
+    <table id="tabla_libros" class="table">
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Título</th>          
+          <th>Autor</th> 
+          <th>Fecha de Publicación</th>         
+          <th>Opciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for libro in object_list %}
+        <tr>
+          <td>{{ libro.id }}</td> 
+          <td>{{ libro.titulo }}</td>
+          <td> <!--Al ser autor_id ManyToManyField se debe consultar con ciclo en la lista de autores los que aparecen para cada libro en específico -->
+            {% for autor in libro.autor_id.all  %}
+            {{ autor.apellido }}, {{ autor.nombre }}. 
+            {% endfor %}
+          </td>  
+          <td>{{ libro.fecha_publicacion }}</td>
+          <td>
+            <a href="{% url 'libro:editar_libro' libro.id %}" class="btn btn-primary" >Editar</a>
+            <a href="{% url 'libro:eliminar_libro' libro.id %}" class="btn btn-danger">Eliminar</a>
+        </td>         
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="modal fade" id="creacion" role="dialog">
+
+</div>
+<div class="modal fade" id="edicion" role="dialog">
+
+</div>
+<div class="modal fade" id="eliminacion" role="dialog">
+
+</div>
+
+
+{% endblock body %}
+{% block extrajs %}
+<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+<script src="{% static 'js/lib/data-table/dataTables.bootstrap.min.js' %}"></script>
+<script src="{% static 'js/libro/libro.js' %}"></script>
+{% endblock extrajs %}

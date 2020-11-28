@@ -1,0 +1,56 @@
+{% extends 'index.html' %}
+
+{% block titulo %}Creación de Autores {% endblock titulo %}
+
+{% block body %}
+
+{% if error %}
+    <h2>{{error}}</h2>
+{% else %}
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Formulario de Registro</h3>
+        </div>
+        <div class="card-body card-block">               
+
+            <form method="post" enctype="multipart/form-data" class="form-horizontal">
+                {% csrf_token %}
+                <div class="row form-group">
+                    <div class="col col-md-3"><strong>{{form.nombre.label}}</strong></div>
+                    <div class="col-12 col-md-9">{{form.nombre}}</div>
+                </div>
+                <div class="row form-group">
+                    <div class="col col-md-3"><strong>{{form.apellido.label}}</strong></div>
+                    <div class="col-12 col-md-9">{{form.apellido}}</div>
+                </div>
+                <div class="row form-group">
+                    <div class="col col-md-3"><strong>{{form.pais.label}}</strong></div>
+                    <div class="col-12 col-md-9">{{form.pais}}</div>
+                </div>
+                <div class="row form-group">
+                    <div class="col col-md-3"><strong>{{form.descripcion.label}}</strong></div>
+                    <div class="col-12 col-md-9">{{form.descripcion}}</div>
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Registrar</button>
+                    <button type="reset" class="btn btn-danger">Cancelar</button>
+                </div>          
+                
+            </form>
+
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+{% endif %}    
+
+
+{% endblock body %}

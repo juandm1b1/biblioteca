@@ -1,0 +1,54 @@
+{% extends 'index.html' %}
+{% load staticfiles %}
+{% block titulo %}
+Biblioteca JDMB | Registrar Libro
+{% endblock titulo %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/lib/datatable/dataTables.bootstrap.min.css' %}">
+{% endblock extra_css %}
+{% block body %}
+<div class="card">
+  <div class="card-header">
+      <h3>Formulario de Registro</h3>
+  </div>
+  <div class="card-body card-block">               
+
+    <form id="form_creacion" method="POST" enctype="multipart/form-data" class="form-horizontal"> 
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Registrar</button>
+    </form>  
+  </div>
+</div>
+{% endblock body %}
+
+
+
+
+
+
+
+
+<!-- <div class="modal-dialog modal-lg" role="document">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">Creacion de Libro</h2>
+      <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <form id="form_creacion" action=" url 'libro:crear_libro' " method="POST">
+       csrf_token 
+      <div class="modal-body">
+        <div id="errores">
+        
+        </div>
+         form.as_p 
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" type="button" onclick="cerrar_modal_creacion();">Cancelar</button>
+        <button id="boton_creacion" class="btn btn-primary" type="button" onclick="registrar();">Confirmar</button>
+      </div>
+    </form>
+  </div>
+</div> -->
