@@ -1,3 +1,5 @@
+<!-- modal para edición de autor dentro de listar_autor -->
+
 <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
         <div class="modal-header">
@@ -15,8 +17,8 @@
                 {{ form.as_p }}
             </div>
             <div class="modal-footer">
-                <button class="btn btn-danger" type="button" onclick="cerrar_modal_edicion();">Cancelar</button>
-                <button id="boton_creacion" class="btn btn-primary" type="button" onclick="editar();">Confirmar</button>
+                <button class="btn btn-danger" type="button" data-dismiss="modal">Cancelar</button> <!-- onclick="cerrar_modal_edicion();" -->
+                <button id="boton_creacion" class="btn btn-primary" type="submit" >Confirmar</button> <!-- onclick="editar();" -->
             </div>
         </form>
     </div>

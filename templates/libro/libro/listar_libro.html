@@ -1,24 +1,28 @@
 {% extends 'index.html' %}
 {% load staticfiles %}
 {% block titulo %}
-Biblioteca.dev | Listado de Libros
+Biblioteca JDMB | Listado de Libros
 {% endblock titulo %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/lib/datatable/dataTables.bootstrap.min.css' %}">
 {% endblock extra_css %}
 {% block body %}
+
+
 <div class="card">
+
   <div class="card-header">
     <div class="row">
       <div class="col-md-8">
         <strong class="card-title">Listado de Libros</strong>
       </div>
       <div class="col-md-4">
-        <a href="{% url 'libro:crear_libro' %}" class="btn btn-primary">REGISTRAR LIBRO</a>        
+        <button class="btn btn-success" type="button" onclick="abrir_modal_creacion('{% url 'libro:crear_libro' %}')">Registrar Libro</button>        
       </div>
     </div>
-
   </div>
+
+  {% if libros %}
   <div class="table-stats order-table ov-h">
     <table id="tabla_libros" class="table">
       <thead>
@@ -31,27 +35,46 @@ Biblioteca.dev | Listado de Libros
         </tr>
       </thead>
       <tbody>
-        {% for libro in object_list %}
+         {% for libro in libros %} <!--Como ya no es con ListView, deja de existir la propiedad object_list -->
         <tr>
           <td>{{ libro.id }}</td> 
           <td>{{ libro.titulo }}</td>
           <td> <!--Al ser autor_id ManyToManyField se debe consultar con ciclo en la lista de autores los que aparecen para cada libro en específico -->
             {% for autor in libro.autor_id.all  %}
-            {{ autor.apellido }}, {{ autor.nombre }}. 
+            <li>{{ autor.apellido }}, {{ autor.nombre }}</li>            
             {% endfor %}
           </td>  
           <td>{{ libro.fecha_publicacion }}</td>
-          <td>
-            <a href="{% url 'libro:editar_libro' libro.id %}" class="btn btn-primary" >Editar</a>
-            <a href="{% url 'libro:eliminar_libro' libro.id %}" class="btn btn-danger">Eliminar</a>
-        </td>         
+          <td>            
+            <button onclick="abrir_modal_edicion('{% url 'libro:editar_libro' libro.id %}')" class="btn btn-primary">Editar</button>
+            <button onclick="abrir_modal_eliminacion('{% url 'libro:eliminar_libro' libro.id %}')" class="btn btn-danger">Eliminar</button>             
+          </td>         
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+  {% else %}
+    <h1>No hay libros para mostrar</h1>
+  {% endif %}
 </div>
-<div class="modal fade" id="creacion" role="dialog">
+
+<!-- formulario registro libros -->
+<!-- <div class="card">
+  <div class="card-header">
+      <h3>Formulario de Registro</h3>
+  </div>
+  <div class="card-body card-block">               
+
+    <form id="form_creacion" method="POST" enctype="multipart/form-data" class="form-horizontal"> 
+        % csrf_token %
+         form.as_p 
+        <button type="submit" class="btn btn-success">Registrar</button>
+    </form>  
+  </div>
+</div> -->
+
+<div class="modal fade" id="creacion" role="dialog"><!-- Modales -->
 
 </div>
 <div class="modal fade" id="edicion" role="dialog">
@@ -63,8 +86,31 @@ Biblioteca.dev | Listado de Libros
 
 
 {% endblock body %}
+
 {% block extrajs %}
 <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
 <script src="{% static 'js/lib/data-table/dataTables.bootstrap.min.js' %}"></script>
 <script src="{% static 'js/libro/libro.js' %}"></script>
+
+<script type="text/javascript">
+
+  var $ = jQuery.noConflict(); 
+
+  function abrir_modal_creacion(url){
+    $('#creacion').load(url, function (){
+      $(this).modal('show');
+    });
+    
+  function abrir_modal_edicion(url){
+    $('#edicion').load(url, function (){
+      $(this).modal('show');
+    });   
+
+  function abrir_modal_eliminacion(url){
+    $('#eliminacion').load(url, function (){
+      $(this).modal('show');
+    }); 
+  }
+
+</script>
 {% endblock extrajs %}

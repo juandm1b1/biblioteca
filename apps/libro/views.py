@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.core.exceptions import ObjectDoesNotExist
-from django.views.generic import View, TemplateView, ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import View, TemplateView, ListView, CreateView, UpdateView, DeleteView, FormView
 from django.urls import reverse_lazy
 from .forms import AutorForm, LibroForm
 from .models import Autor, Libro
@@ -22,25 +22,50 @@ class Inicio(TemplateView):
     template_name = 'index.html' 
 
 
-class ListadoAutor(ListView): # 'Consultar': SELECT * FROM interno. RETORNA UNA LISTA DE OBJETOS, por lo que en el Template se debe llamar como 'object_list'
+ # ListView -> 'Consultar': SELECT * FROM interno. RETORNA UNA LISTA DE OBJETOS, por lo que en el Template se debe llamar como 'object_list'
+class ListadoAutor(View): # Se cambia ListView por View para usar el Método post e INCLUIR EL FORM DE REGISTRO EN EL LISTADO DE AUTORES
     model = Autor
     template_name = 'libro/autor/listar_autor.html'
+    form_class = AutorForm
     #context_object_name = 'autores' #Si se quiere personalizar el nombre de 'object_list'
-    queryset = Autor.objects.filter(estado=True)
+
+    def get_queryset(self):
+        return self.model.objects.filter(estado=True)
+    
+    def get_context_data(self,**kwargs):
+        ctx = {}
+        ctx['autores'] = self.get_queryset()
+        ctx['form'] = self.form_class
+        return ctx
+
+    def get(self,request,*args,**kwargs):
+        return render(request,self.template_name,self.get_context_data())
+
+    def post(self,request,*args,**kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('libro:listar_autor')  
 
 
 class CrearAutor(CreateView): # INSERT
-    model = Autor    
-    template_name = 'libro/autor/crear_autor.html'
-    form_class = AutorForm
+    model = Autor
+    form_class = AutorForm    
+    template_name = 'libro/autor/crear_autor.html'    
     success_url = reverse_lazy('libro:listar_autor')
 
 
 class EditarAutor(UpdateView): # UPDATE
-    model = Autor    
-    template_name = 'libro/autor/crear_autor.html'
-    form_class = AutorForm
-    success_url = reverse_lazy('libro:listar_autor')    
+    model = Autor
+    form_class = AutorForm    
+    template_name = 'libro/autor/autor.html'    
+    success_url = reverse_lazy('libro:listar_autor')  
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(*kwargs)
+        ctx['autores'] = self.model.objects.filter(estado=True)
+        return ctx
+
 
     """ 
     En vistas basadas en clases, el parámetro en la url debe ser 'pk' o 'slug', y el form debe ser llamado en el template como 'form'
@@ -48,7 +73,7 @@ class EditarAutor(UpdateView): # UPDATE
 
 class EliminarAutor(DeleteView):
     model = Autor    
-    #success_url = reverse_lazy('libro:listar_autor') # Este se quita porque es para el borrado total   
+    success_url = reverse_lazy('libro:listar_autor') # Este se quita porque es para el borrado total   
     
     # Se sobreescribe el método post para hacer que el borrado sea lógico y no definitivo de la BD
     def post(self,request,pk,*args,**kwargs):
@@ -63,13 +88,37 @@ class EliminarAutor(DeleteView):
     """
 
 
-class ListadoLibros(ListView):
+class ListadoLibros(View): # Se cambia ListView por View para usar el Método post e INCLUIR EL FORM DE REGISTRO EN EL LISTADO DE LIBROS
     model = Libro
+    form_class = LibroForm
     template_name = 'libro/libro/listar_libro.html'
-    queryset = Libro.objects.filter(estado=True)
+    
+
+    # RETORNA LA CONSULTA
+    def get_queryset(self):  # Este método se ejecuta automáticamente en ListView al crear 'queryset'. Se sobreescribe para ser usado a nivel de clase y no solo en el método
+        return Libro.objects.filter(estado=True)
+
+    # RETORNA EL CONTEXTO A ENVIAR AL TEMPLATE
+    def get_context_data(self,**kwargs): # Método automático en ListView ('context_object_name'). Para retornar Contexto a nivel de clase
+        ctx = {}
+        ctx['libros'] = self.get_queryset()
+        ctx['form'] = self.form_class
+        return ctx
+    
+    # RETORNA EL RENDERIZADO CON LA PETICIÖN HTTP MËTODO GET
+    def get(self,request,*args,**kwargs):        
+        # ctx = {'libros': self.get_queryset()} # En vez de esta consulta, se trae el contexto desde get_context_data
+        return render(request, self.template_name, self.get_context_data())
+
+    # RETORNA EL RENDERIZADO CON LA PETICIÖN HTTP MËTODO POST
+    def post(self,request,*args,**kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            form.save()  
+            return redirect('libro:listar_libros')
 
 
-class CrearLibro(CreateView):
+class CrearLibro(CreateView): 
     model = Libro
     form_class = LibroForm
     template_name = 'libro/libro/crear_libro.html'
@@ -79,19 +128,33 @@ class CrearLibro(CreateView):
 class EditarLibro(UpdateView):
     model = Libro
     form_class =LibroForm
-    template_name = 'libro/libro/crear_libro.html'
+    template_name = 'libro/libro/libro.html' # Este template es donde está definido el Modal de edición de libro
     success_url = reverse_lazy('libro:listar_libros')
+
+    def get_context_data(self,**kwargs):
+        ctx = super().get_context_data(**kwargs) # Si se quita el parámetro **kwargs, igual funciona
+        ctx['libros'] = Libro.objects.filter(estado=True)
+        return ctx        
 
 
 class EliminarLibro(DeleteView):
     model = Libro    
-    #success_url = reverse_lazy('libro:listar_libros')
+    success_url = reverse_lazy('libro:listar_libros')
 
     def post(self,request,pk,*args,**kwargs):
         libro = Libro.objects.get(id=pk)
         libro.estado = False
         libro.save()
         return redirect('libro:listar_libros')
+
+
+
+
+
+
+
+
+
 
 
 

@@ -4,11 +4,18 @@
 
 {% block body %} 
 
-{% if object_list %}
+{% if autores %} <!-- 'object_list' desaparece porque ya no es LIstView sino View -->
 
 <div class="card">
-    <div class="card-header">
-        <strong class="card-title">Listado de Autores</strong>
+    <div class="card-header">        
+        <div class="row">
+            <div class="col-md-8">
+                <strong class="card-title">Listado de Autores</strong>
+            </div>    
+            <div class="col-md-4">
+                <button class="btn btn-success" type="button" onclick="abrir_modal_creacion('{% url 'libro:crear_autor' %}')">Registrar Autor</button>        
+            </div>
+        </div>
     </div>
     <div class="table-stats order-table ov-h">
 
@@ -25,7 +32,7 @@
             </thead>
             
             <tbody>
-                {% for autor in object_list %}
+                {% for autor in autores %}
                 <tr>
                     <td>{{ autor.id}}</td>
                     <td>{{ autor.nombre}}</td>
@@ -33,8 +40,8 @@
                     <td>{{ autor.pais}}</td>
                     <td>{{ autor.descripcion}}</td>
                     <td>
-                        <a href="{% url 'libro:editar_autor' autor.id %}" class="btn btn-primary" >Editar</a>
-                        <a href="{% url 'libro:eliminar_autor' autor.id %}" class="btn btn-danger">Eliminar</a>
+                        <button onclick="abrir_modal_edicion('{% url 'libro:editar_autor' autor.id %}')" class="btn btn-primary">Editar</button>
+                        <button onclick="abrir_modal_eliminacion('{% url 'libro:eliminar_autor' autor.id %}')" class="btn btn-danger">Eliminar</button>                        
                     </td>
                 </tr>
                 {% endfor %}
@@ -44,15 +51,50 @@
     </div>
 </div>
 
-
-
 {% else %}
 
 <h1>No existen autores registrados o autores con el id proporcionado</h1>
 
 {% endif %}
 
+<div class="modal fade" id="creacion" role="dialog"><!-- Modales -->
+
+</div>
+<div class="modal fade" id="edicion" role="dialog">
+
+</div>
+<div class="modal fade" id="eliminacion" role="dialog">
+
+</div>
+
 {% endblock body %}
+
+
+{% block extrajs %}
+
+<script type="text/javascript">
+    var $ = jQuery.noConflict();
+
+    function abrir_modal_creacion(url){
+        $('#creacion').load(url, function (){
+            $(this).modal('show');
+        });
+    }
+
+    function abrir_modal_edicion(url){
+        $('#edicion').load(url, function (){
+            $(this).modal('show');
+        }); 
+    }
+
+    function abrir_modal_eliminacion(url){
+        $('#eliminacion').load(url, function (){
+            $(this).modal('show');
+        });
+    }    
+</script>
+
+{% endblock extrajs %}
 
 
    

@@ -1,56 +1,24 @@
-{% extends 'index.html' %}
+<!-- Template para todo el HTML del modal de Creación-->
 
-{% block titulo %}Creación de Autores {% endblock titulo %}
-
-{% block body %}
-
-{% if error %}
-    <h2>{{error}}</h2>
-{% else %}
-
-    <div class="card">
-        <div class="card-header">
-            <h3>Formulario de Registro</h3>
+<div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Creación de Autor</h2>
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      
+      <form action="{% url 'libro:crear_autor' %}" method="POST">
+        {% csrf_token %}
+        <div class="modal-body">
+            {{ form.as_p }}
+        </div>        
+    
+        <div class="modal-footer">
+          <button class="btn btn-danger" type="button" data-dismiss="modal">Cancelar</button> <!-- onclick="cerrar_modal_creacion(); -->
+          <button id="boton_creacion" class="btn btn-primary" type="submit" >Confirmar</button> <!-- onclick="cerrar_modal_creacion();onclick="registrar();" -->
         </div>
-        <div class="card-body card-block">               
-
-            <form method="post" enctype="multipart/form-data" class="form-horizontal">
-                {% csrf_token %}
-                <div class="row form-group">
-                    <div class="col col-md-3"><strong>{{form.nombre.label}}</strong></div>
-                    <div class="col-12 col-md-9">{{form.nombre}}</div>
-                </div>
-                <div class="row form-group">
-                    <div class="col col-md-3"><strong>{{form.apellido.label}}</strong></div>
-                    <div class="col-12 col-md-9">{{form.apellido}}</div>
-                </div>
-                <div class="row form-group">
-                    <div class="col col-md-3"><strong>{{form.pais.label}}</strong></div>
-                    <div class="col-12 col-md-9">{{form.pais}}</div>
-                </div>
-                <div class="row form-group">
-                    <div class="col col-md-3"><strong>{{form.descripcion.label}}</strong></div>
-                    <div class="col-12 col-md-9">{{form.descripcion}}</div>
-                </div>
-                
-                <div class="text-center">
-                    <button type="submit" class="btn btn-primary">Registrar</button>
-                    <button type="reset" class="btn btn-danger">Cancelar</button>
-                </div>          
-                
-            </form>
-
-        </div>
+      </form>
     </div>
-
-
-
-
-
-
-
-
-{% endif %}    
-
-
-{% endblock body %}
+</div>  

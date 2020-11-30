@@ -1,3 +1,5 @@
+<!-- Template para todo el HTML del modal de EDICIÖN-->
+
 <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
         <div class="modal-header">
@@ -6,6 +8,7 @@
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
+        <!-- 'object' viene ya definido del método get_object(), que se ejecuta automáticamente en UpdateView -->
         <form id="form_edicion"  action="{% url 'libro:editar_libro' object.id %}" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="modal-body">
@@ -15,8 +18,8 @@
                 {{ form.as_p }}
             </div>
             <div class="modal-footer">
-                <button class="btn btn-danger" type="button" onclick="cerrar_modal_edicion();">Cancelar</button>
-                <button id="boton_creacion" class="btn btn-primary" type="button" onclick="editar();">Confirmar</button>
+                <button class="btn btn-danger" type="button" data-dismiss="modal">Cancelar</button> <!-- onclick="cerrar_modal_edicion(); -->
+                <button id="boton_creacion" class="btn btn-primary" type="submit">Confirmar</button>  <!-- onclick="editar(); -->
             </div>
         </form>        
     </div>
