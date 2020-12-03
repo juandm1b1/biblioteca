@@ -4,8 +4,6 @@
 
 {% block body %} 
 
-{% if autores %} <!-- 'object_list' desaparece porque ya no es LIstView sino View -->
-
 <div class="card">
     <div class="card-header">        
         <div class="row">
@@ -17,6 +15,8 @@
             </div>
         </div>
     </div>
+
+    {% if autores %} <!-- 'object_list' desaparece porque ya no es LIstView sino View -->
     <div class="table-stats order-table ov-h">
 
         <table class="table">    
@@ -71,29 +71,6 @@
 
 
 {% block extrajs %}
-
-<script type="text/javascript">
-    var $ = jQuery.noConflict();
-
-    function abrir_modal_creacion(url){
-        $('#creacion').load(url, function (){
-            $(this).modal('show');
-        });
-    }
-
-    function abrir_modal_edicion(url){
-        $('#edicion').load(url, function (){
-            $(this).modal('show');
-        }); 
-    }
-
-    function abrir_modal_eliminacion(url){
-        $('#eliminacion').load(url, function (){
-            $(this).modal('show');
-        });
-    }    
-</script>
-
 {% endblock extrajs %}
 
 

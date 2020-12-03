@@ -3,11 +3,13 @@ function listadoUsuarios(){
         url: "/usuarios/listado_usuarios/",
         type:"get",
         dataType: "json",
-        success: function(response){
+        success: function(response){ 
+            // Para colocar la info recibida
             if($.fn.DataTable.isDataTable('#tabla_usuarios')){
                 $('#tabla_usuarios').DataTable().destroy();
             }
-            $('#tabla_usuarios tbody').html("");
+            $('#tabla_usuarios tbody').html(""); // Para asegurarse que el cuerpo de DataTable esté vacío
+            // Se 'pinta' fila por fila la tabla con los registros recibidis en la petición AJAX
             for(let i = 0;i < response.length;i++){
                 let fila = '<tr>';
                 fila += '<td>' + (i +1 ) + '</td>';
@@ -20,8 +22,9 @@ function listadoUsuarios(){
                 fila += '<button type = "button" class = "btn btn-danger tableButton  btn-sm" ';
                 fila += 'onclick = "abrir_modal_eliminacion(\'/usuarios/eliminar_usuario/' + response[i]['pk'] +'/\');"> ELIMINAR </buttton></td>';
                 fila += '</tr>';
-                $('#tabla_usuarios tbody').append(fila);
+                $('#tabla_usuarios tbody').append(fila); //
             }
+            // Se instancia DataTable           
             $('#tabla_usuarios').DataTable({
                 language: {
                     "decimal": "",
@@ -42,15 +45,16 @@ function listadoUsuarios(){
                         "next": "Siguiente",
                         "previous": "Anterior"
                     },
-                },
-            });
-        },
+                },                
+            }); 
+        },        
         error: function(error){
             console.log(error);
         }
     });
 }
-function registrar() {
+
+function registrar(){
     activarBoton();
     $.ajax({
         data: $('#form_creacion').serialize(),
@@ -60,6 +64,7 @@ function registrar() {
             notificacionSuccess(response.mensaje);
             listadoUsuarios();
             cerrar_modal_creacion();
+            alert("Agregado correctamente");
         },
         error: function (error) {
             notificacionError(error.responseJSON.mensaje);
@@ -68,6 +73,7 @@ function registrar() {
         }
     });
 }
+
 function editar(){
     activarBoton();
     $.ajax({
@@ -86,7 +92,8 @@ function editar(){
         }
     });
 }
-function eliminar(pk) {
+
+function eliminar(pk){
     $.ajax({
         data:{
             csrfmiddlewaretoken: $("[name='csrfmiddlewaretoken']").val()
@@ -103,6 +110,9 @@ function eliminar(pk) {
         }
     });
 }
+
 $(document).ready(function (){
     listadoUsuarios();
 });
+
+

@@ -88,13 +88,16 @@ jQuery(document).ready(function($) {
 
  
 });
-function abrir_modal_edicion(url) {
-	$('#edicion').load(url, function () {
+
+// Funciones Propias generalizadas en archivo main.js
+
+function abrir_modal_creacion(url) {
+	$('#creacion').load(url, function () {
 		$(this).modal('show');
 	});
 }
-function abrir_modal_creacion(url) {
-	$('#creacion').load(url, function () {
+function abrir_modal_edicion(url) {
+	$('#edicion').load(url, function () {
 		$(this).modal('show');
 	});
 }
@@ -103,8 +106,9 @@ function abrir_modal_eliminacion(url) {
 		$(this).modal('show');
 	});
 }
+
 function cerrar_modal_creacion(){
-	$('#creacion').modal('hide');
+	$('#creacion').modal('hide');	
 }
 
 function cerrar_modal_edicion() {

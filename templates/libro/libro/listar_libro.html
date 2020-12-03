@@ -1,5 +1,5 @@
 {% extends 'index.html' %}
-{% load staticfiles %}
+{% load static %}
 {% block titulo %}
 Biblioteca JDMB | Listado de Libros
 {% endblock titulo %}
@@ -59,20 +59,6 @@ Biblioteca JDMB | Listado de Libros
   {% endif %}
 </div>
 
-<!-- formulario registro libros -->
-<!-- <div class="card">
-  <div class="card-header">
-      <h3>Formulario de Registro</h3>
-  </div>
-  <div class="card-body card-block">               
-
-    <form id="form_creacion" method="POST" enctype="multipart/form-data" class="form-horizontal"> 
-        % csrf_token %
-         form.as_p 
-        <button type="submit" class="btn btn-success">Registrar</button>
-    </form>  
-  </div>
-</div> -->
 
 <div class="modal fade" id="creacion" role="dialog"><!-- Modales -->
 
@@ -83,34 +69,10 @@ Biblioteca JDMB | Listado de Libros
 <div class="modal fade" id="eliminacion" role="dialog">
 
 </div>
-
-
 {% endblock body %}
 
 {% block extrajs %}
 <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
 <script src="{% static 'js/lib/data-table/dataTables.bootstrap.min.js' %}"></script>
 <script src="{% static 'js/libro/libro.js' %}"></script>
-
-<script type="text/javascript">
-
-  var $ = jQuery.noConflict(); 
-
-  function abrir_modal_creacion(url){
-    $('#creacion').load(url, function (){
-      $(this).modal('show');
-    });
-    
-  function abrir_modal_edicion(url){
-    $('#edicion').load(url, function (){
-      $(this).modal('show');
-    });   
-
-  function abrir_modal_eliminacion(url){
-    $('#eliminacion').load(url, function (){
-      $(this).modal('show');
-    }); 
-  }
-
-</script>
 {% endblock extrajs %}

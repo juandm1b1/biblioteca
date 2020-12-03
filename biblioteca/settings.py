@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'biblioteca.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql', # '_psycopg2' dejó de necesitar escribirse en engine a partir del Django 3.0
         'NAME': 'biblioteca',
         'USER': 'postgres',
         'PASSWORD': 'contrasena',
@@ -110,6 +110,12 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+""" Lo siguiente se agregar para indicar el uso de la creación y autenticación de usuario personalizada en models.py de
+    la app usuario:
+"""
+AUTH_USER_MODEL = 'usuario.Usuario' # Nombre_app.nombre_modelo
+
 
 
 # Internationalization
