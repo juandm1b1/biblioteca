@@ -117,6 +117,8 @@ function cerrar_modal_edicion() {
 function cerrar_modal_eliminacion() {
 	$('#eliminacion').modal('hide');
 }
+
+//Función para bloquear el botón confirmar (btnes de creación) al 1er click
 function activarBoton(){
 	if($('#boton_creacion').prop('disabled')){
 		$('#boton_creacion').prop('disabled',false);
@@ -125,6 +127,7 @@ function activarBoton(){
 	}
 }
 
+// Función global que muesta en un div con id errores lo que retorna Django desde la vista cuando hay errores en el formulario
 function mostrarErroresCreacion(errores){
 	$('#errores').html("");
 	let error = "";
@@ -142,18 +145,18 @@ function mostrarErroresEdicion(errores) {
 	$('#erroresEdicion').append(error);
 }
 
+// alertas con Sweet Alert - 68. Mostrar alertas con error vía Ajax
+function notificacionSuccess(mensaje){
+	Swal.fire({
+		title: 'Confirmado!',
+		text: mensaje,
+		icon: 'success'
+	})
+}
 function notificacionError(mensaje){
 	Swal.fire({
 		title: 'Error!',
 		text: mensaje,
 		icon: 'error'
-	})
-}
-
-function notificacionSuccess(mensaje) {
-	Swal.fire({
-		title: 'Buen Trabajo!',
-		text: mensaje,
-		icon: 'success'
 	})
 }

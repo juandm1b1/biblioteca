@@ -4,12 +4,12 @@ function listadoUsuarios(){
         type:"get",
         dataType: "json",
         success: function(response){ 
-            // Para colocar la info recibida
+            // Para colocar la info recibida. El if destruye la instancia de DataTable existente antes del ingresar un nuevo registro
             if($.fn.DataTable.isDataTable('#tabla_usuarios')){
                 $('#tabla_usuarios').DataTable().destroy();
             }
             $('#tabla_usuarios tbody').html(""); // Para asegurarse que el cuerpo de DataTable esté vacío
-            // Se 'pinta' fila por fila la tabla con los registros recibidis en la petición AJAX
+            // Se 'pinta' fila por fila la tabla con los registros recibidos en la petición AJAX
             for(let i = 0;i < response.length;i++){
                 let fila = '<tr>';
                 fila += '<td>' + (i +1 ) + '</td>';
@@ -18,9 +18,9 @@ function listadoUsuarios(){
                 fila += '<td>' + response[i]["fields"]['apellidos'] + '</td>';
                 fila += '<td>' + response[i]["fields"]['email'] + '</td>';
                 fila += '<td><button type = "button" class = "btn btn-primary btn-sm tableButton"';
-                fila += ' onclick = "abrir_modal_edicion(\'/usuarios/actualizar_usuario/' + response[i]['pk']+'/\');"> EDITAR </button>';
+                fila += ' onclick = "abrir_modal_edicion(\'/usuarios/editar_usuario/' + response[i]['pk'] + '/\');"> EDITAR </button>';
                 fila += '<button type = "button" class = "btn btn-danger tableButton  btn-sm" ';
-                fila += 'onclick = "abrir_modal_eliminacion(\'/usuarios/eliminar_usuario/' + response[i]['pk'] +'/\');"> ELIMINAR </buttton></td>';
+                fila += 'onclick = "abrir_modal_eliminacion(\'/usuarios/eliminar_usuario/' + response[i]['pk'] + '/\');"> ELIMINAR </buttton></td>';
                 fila += '</tr>';
                 $('#tabla_usuarios tbody').append(fila); //
             }
@@ -61,12 +61,13 @@ function registrar(){
         url: $('#form_creacion').attr('action'),
         type: $('#form_creacion').attr('method'),
         success: function (response) {
+            //console.log(response);
             notificacionSuccess(response.mensaje);
             listadoUsuarios();
-            cerrar_modal_creacion();
-            alert("Agregado correctamente");
+            cerrar_modal_creacion();            
         },
         error: function (error) {
+            // console.log(error);
             notificacionError(error.responseJSON.mensaje);
             mostrarErroresCreacion(error);
             activarBoton();
@@ -95,6 +96,7 @@ function editar(){
 
 function eliminar(pk){
     $.ajax({
+        // Se envía el token de seguridad
         data:{
             csrfmiddlewaretoken: $("[name='csrfmiddlewaretoken']").val()
         },

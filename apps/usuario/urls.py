@@ -6,7 +6,9 @@ from apps.usuario import views
 urlpatterns = [    
     # Se pueden pasar parámetros extra en el path, en 3er lugar después de la vista, como diccionario, y ser usado en la view llamando el parámetro
     path('listado_usuarios/', login_required(views.ListarUsuario.as_view()), {'parametro_extra': 'Hola gonohp carech'}, name = 'listado_usuarios'),
-    path('registrar_usuario/', login_required(views.RegistrarUsuario.as_view()), name = 'registrar_usuario'),    
+    path('registrar_usuario/', login_required(views.RegistrarUsuario.as_view()), name = 'registrar_usuario'),
+    path('editar_usuario/<int:pk>/', login_required(views.EditarUsuario.as_view()), name = 'editar_usuario'),
+    path('eliminar_usuario/<int:pk>/', login_required(views.EliminarUsuario.as_view()), name = 'eliminar_usuario'),   
 ]   
 
 # URLS de vistas "implícitas"

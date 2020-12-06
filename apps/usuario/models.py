@@ -42,7 +42,7 @@ class UsuarioManager(BaseUserManager):
 class Usuario(AbstractBaseUser): #(User)
     # usuario = models.ForeignKey(User, on_delete=CASCADE)
     username = models.CharField(verbose_name='Nombre de Usuario', unique=True, max_length=100)
-    email = models.EmailField(verbose_name='Correo electrónico', unique=True, max_length=254)
+    email = models.EmailField(verbose_name='Correo Electrónico', unique=True, max_length=254)
     nombres = models.CharField(verbose_name='Nombres',max_length=200,blank=True, null=True)
     apellidos = models.CharField(verbose_name='Apellidos',max_length=200,blank=True, null=True)
     imagen = models.ImageField(verbose_name='Imagen de Perfil', upload_to='perfil/', max_length=200, blank=True, null=True)

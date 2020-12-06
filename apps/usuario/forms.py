@@ -71,7 +71,7 @@ class FormularioUsuario(forms.ModelForm):
         """ Validación de contraseña:
         
         Método que valida que ambas contraseñas ingresadas sean iguales, esto antes de ser encriptadas y guardadas en la BD.
-        Retorna la contraseña validada.
+        Retorna la contraseña validada. 
 
         Excepciones:
          - ValidationError : CUando las contraseñas no son iguales muestra mensaje de error
@@ -91,7 +91,7 @@ class FormularioUsuario(forms.ModelForm):
         - commit -> significa que proceda con el registro        
     """
     def save(self, commit = True):
-        print('ENTRÓ A SAVE DE FORMS.PY')
+        #print('ENTRÓ A SAVE DE FORMS.PY')
         user = super().save(commit=False) # Cuando se cambia commit a False, no se llama directamente el save() del modelo, sino que se guarda la instancia/info que se pretende guardar
         user.set_password(self.cleaned_data['password1']) # Método set_password() que encripta las contraseñas -viene de 'AbstractBaseUser'
         if commit: # Cuando el commit pase a True durante la ejecución luego de encriptar la contraseña
