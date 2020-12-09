@@ -6,9 +6,8 @@ Biblioteca JDMB | Listado de Libros
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/lib/datatable/dataTables.bootstrap.min.css' %}">
 {% endblock extra_css %}
+
 {% block body %}
-
-
 <div class="card">
 
   <div class="card-header">
@@ -21,13 +20,12 @@ Biblioteca JDMB | Listado de Libros
       </div>
     </div>
   </div>
-
-  {% if libros %}
+  
   <div class="table-stats order-table ov-h">
     <table id="tabla_libros" class="table">
       <thead>
         <tr>
-          <th>Id</th>
+          <th>#</th>
           <th>Título</th>          
           <th>Autor</th> 
           <th>Fecha de Publicación</th>         
@@ -35,28 +33,9 @@ Biblioteca JDMB | Listado de Libros
         </tr>
       </thead>
       <tbody>
-         {% for libro in libros %} <!--Como ya no es con ListView, deja de existir la propiedad object_list -->
-        <tr>
-          <td>{{ libro.id }}</td> 
-          <td>{{ libro.titulo }}</td>
-          <td> <!--Al ser autor_id ManyToManyField se debe consultar con ciclo en la lista de autores los que aparecen para cada libro en específico -->
-            {% for autor in libro.autor_id.all  %}
-            <li>{{ autor.apellido }}, {{ autor.nombre }}</li>            
-            {% endfor %}
-          </td>  
-          <td>{{ libro.fecha_publicacion }}</td>
-          <td>            
-            <button onclick="abrir_modal_edicion('{% url 'libro:editar_libro' libro.id %}')" class="btn btn-primary">Editar</button>
-            <button onclick="abrir_modal_eliminacion('{% url 'libro:eliminar_libro' libro.id %}')" class="btn btn-danger">Eliminar</button>             
-          </td>         
-        </tr>
-        {% endfor %}
+
       </tbody>
-    </table>
-  </div>
-  {% else %}
-    <h1>No hay libros para mostrar</h1>
-  {% endif %}
+    </table> 
 </div>
 
 
@@ -76,3 +55,6 @@ Biblioteca JDMB | Listado de Libros
 <script src="{% static 'js/lib/data-table/dataTables.bootstrap.min.js' %}"></script>
 <script src="{% static 'js/libro/libro.js' %}"></script>
 {% endblock extrajs %}
+
+<!-- % for autor in libro.autor_id.all  %
+            <li> autor.apellido ,  autor.nombre </li>  HACER ESTO EN LA VISTA Y PASARLO EN EL JSON A EL AJAX -->

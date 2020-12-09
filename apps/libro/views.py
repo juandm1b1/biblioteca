@@ -2,8 +2,11 @@ from django.shortcuts import render, redirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic import View, TemplateView, ListView, CreateView, UpdateView, DeleteView, FormView
 from django.urls import reverse_lazy
+from django.core.serializers import serialize # Importación para 2da forma de obtener JSON para petición AJAX
+from django.http import HttpResponse, JsonResponse
 from .forms import AutorForm, LibroForm
 from .models import Autor, Libro
+#from .serializers import AutorSerializer, LibroSerializer NO SE USÓ
 
 
 """
@@ -25,8 +28,8 @@ class Inicio(TemplateView):
  # ListView -> 'Consultar': SELECT * FROM interno. RETORNA UNA LISTA DE OBJETOS, por lo que en el Template se debe llamar como 'object_list'
 class ListadoAutor(View): # Se cambia ListView por View para usar el Método post e INCLUIR EL FORM DE REGISTRO EN EL LISTADO DE AUTORES
     model = Autor
-    template_name = 'libro/autor/listar_autor.html'
     form_class = AutorForm
+    #template_name = 'libro/autor/listar_autor.html'    
     #context_object_name = 'autores' #Si se quiere personalizar el nombre de 'object_list'
 
     def get_queryset(self):
@@ -39,7 +42,12 @@ class ListadoAutor(View): # Se cambia ListView por View para usar el Método pos
         return ctx
 
     def get(self,request,*args,**kwargs):
-        return render(request,self.template_name,self.get_context_data())
+        if request.is_ajax():
+            data = serialize('json', self.get_queryset())
+            return HttpResponse(data,'application/json')
+        else:
+            return redirect('libro:inicio_autores')
+        #return render(request,self.template_name,self.get_context_data())
 
     def post(self,request,*args,**kwargs):
         form = self.form_class(request.POST)
@@ -52,19 +60,58 @@ class CrearAutor(CreateView): # INSERT
     model = Autor
     form_class = AutorForm    
     template_name = 'libro/autor/crear_autor.html'    
-    success_url = reverse_lazy('libro:listar_autor')
+    success_url = reverse_lazy('libro:inicio_autores')
+
+    def post(self,request,*args,**kwargs):
+        if request.is_ajax():
+            form = self.form_class(request.POST)
+            if form.is_valid():
+                form.save()
+                mensaje = f'{self.model.__name__} registrado correctamente!'
+                error = 'No hay error!'
+                response = JsonResponse({'mensaje':mensaje,'error':error}) 
+                response.status_code = 201
+                return response
+            else:
+                mensaje = f'{self.model.__name__} no se ha podido registrar!'
+                error = form.errors
+                response = JsonResponse({'mensaje':mensaje,'error':error})
+                response.status_code = 400
+                return response
+        else:
+            redirect('libro:inicio_autores')
+        
 
 
 class EditarAutor(UpdateView): # UPDATE
     model = Autor
     form_class = AutorForm    
-    template_name = 'libro/autor/autor.html'    
-    success_url = reverse_lazy('libro:listar_autor')  
+    template_name = 'libro/autor/editar_autor.html'    
+    #success_url = reverse_lazy('libro:listar_autor')  
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(*kwargs)
-        ctx['autores'] = self.model.objects.filter(estado=True)
-        return ctx
+    # def get_context_data(self, **kwargs):
+    #     ctx = super().get_context_data(*kwargs)
+    #     ctx['autores'] = self.model.objects.filter(estado=True)
+    #     return ctx
+
+    def post(self,request,*args,**kwargs):
+        if request.is_ajax():
+            form = self.form_class(request.POST, instance=self.get_object())
+            if form.is_valid():
+                form.save()
+                mensaje = f'{self.model.__name__} se ha actualizado correctamente!'
+                error = 'No hay error!'
+                response = JsonResponse({'mensaje':mensaje,'error':error})
+                response.status_code = 201
+                return response
+            else:
+                mensaje = f'{self.model.__name__} no se ha podido actualizar!'
+                error = form.errors
+                response = JsonResponse({'mensaje':mensaje,'error':error})
+                response.status_code = 400
+                return response
+        else:
+            redirect('usuarios:inicio_usuarios')
 
 
     """ 
@@ -74,28 +121,37 @@ class EditarAutor(UpdateView): # UPDATE
 class EliminarAutor(DeleteView):
     model = Autor    
     success_url = reverse_lazy('libro:listar_autor') # Este se quita porque es para el borrado total   
+
+    def delete(self,request,*args,**kwargs):
+        if request.is_ajax():
+            autor = self.get_object()
+            autor.estado = False
+            autor.save()
+            mensaje = f'{self.model.__name__} eliminado correctamente!'
+            error = 'No hay error!'
+            response = JsonResponse({'mensaje':mensaje,'error':error})
+            response.status_code = 201
+            return response
     
-    # Se sobreescribe el método post para hacer que el borrado sea lógico y no definitivo de la BD
-    def post(self,request,pk,*args,**kwargs):
-        autor = Autor.objects.get(id=pk)
-        autor.estado = False
-        autor.save() 
-        return redirect('libro:listar_autor')
+    #     # Se sobreescribe el método post para hacer que el borrado sea lógico y no definitivo de la BD
+    # def post(self,request,pk,*args,**kwargs):
+    #     autor = Autor.objects.get(id=pk)
+    #     autor.estado = False
+    #     autor.save() 
+    #     return redirect('libro:listar_autor')
 
     """
     En DeleteView se debe crear una template "nombreModelo_confirm_delete.html" que es la de confirmación de eliminación    
-    En los template con vistas basadas en clase las instancias de los objetos (ctx) se llaman como 'object'
-    """
+    En los template con vistas basadas en clase las instancias de los objetos (ctx) se llaman como 'object'    """
 
 
 class ListadoLibros(View): # Se cambia ListView por View para usar el Método post e INCLUIR EL FORM DE REGISTRO EN EL LISTADO DE LIBROS
     model = Libro
     form_class = LibroForm
-    template_name = 'libro/libro/listar_libro.html'
-    
+    template_name = 'libro/libro/listar_libro.html'    
 
     # RETORNA LA CONSULTA
-    def get_queryset(self):  # Este método se ejecuta automáticamente en ListView al crear 'queryset'. Se sobreescribe para ser usado a nivel de clase y no solo en el método
+    def get_queryset(self):  # Este método se ejecuta automáticamente en ListView al crear 'queryset'. Se sobreescribe para ser usado a nivel de clase y no solo en el método              
         return Libro.objects.filter(estado=True)
 
     # RETORNA EL CONTEXTO A ENVIAR AL TEMPLATE
@@ -105,10 +161,16 @@ class ListadoLibros(View): # Se cambia ListView por View para usar el Método po
         ctx['form'] = self.form_class
         return ctx
     
-    # RETORNA EL RENDERIZADO CON LA PETICIÖN HTTP MËTODO GET
-    def get(self,request,*args,**kwargs):        
+    # RETORNA EL RENDERIZADO CON LA PETICIÖN HTTP MËTODO GET    
+    def get(self,request,*args,**kwargs):
+        if request.is_ajax():
+            qs = self.get_queryset()            
+            data = serialize('json', qs, use_natural_foreign_keys=True) # 'use_natural_foreign_keys' permite ver otros atributos de ForeignKeys o ManyToManyFields diderentes al id          
+            return HttpResponse(data,'application/json')
+        else:
+            return redirect('libro:inicio_libros')             
         # ctx = {'libros': self.get_queryset()} # En vez de esta consulta, se trae el contexto desde get_context_data
-        return render(request, self.template_name, self.get_context_data())
+        #return render(request, self.template_name, self.get_context_data())
 
     # RETORNA EL RENDERIZADO CON LA PETICIÖN HTTP MËTODO POST
     def post(self,request,*args,**kwargs):
@@ -122,30 +184,84 @@ class CrearLibro(CreateView):
     model = Libro
     form_class = LibroForm
     template_name = 'libro/libro/crear_libro.html'
-    success_url = reverse_lazy('libro:listar_libros')
+    #success_url = reverse_lazy('libro:listar_libros')    
+
+    def post(self,request,*args,**kwargs):
+        if request.is_ajax():
+            form = self.form_class(request.POST)
+            if form.is_valid():                
+                form.save()
+                mensaje = f'{self.model.__name__} creado correctamente!'
+                error = "Sin errores!"
+                response = JsonResponse({'mensaje':mensaje,'error':error})
+                response.status_code = 201
+                return response
+            else:
+                mensaje = f'{self.model.__name__} no se ha podido crear!'
+                error = form.errors
+                response = JsonResponse({'mensaje':mensaje,'error':error})
+                response.status_code = 400
+                return response
+        else:
+            redirect('libro:listar_libros')
+
 
 
 class EditarLibro(UpdateView):
     model = Libro
     form_class =LibroForm
-    template_name = 'libro/libro/libro.html' # Este template es donde está definido el Modal de edición de libro
-    success_url = reverse_lazy('libro:listar_libros')
+    template_name = 'libro/libro/editar_libro.html' # Este template es donde está definido el Modal de edición de libro
+    #success_url = reverse_lazy('libro:listar_libros')
 
     def get_context_data(self,**kwargs):
         ctx = super().get_context_data(**kwargs) # Si se quita el parámetro **kwargs, igual funciona
         ctx['libros'] = Libro.objects.filter(estado=True)
-        return ctx        
+        return ctx     
+
+    def post(self,request,*args,**kwargs):
+        if request.is_ajax():
+            form = self.form_class(request.POST, instance=self.get_object())
+            if form.is_valid():
+                form.save()
+                mensaje = f'{self.model.__name__} editado con éxito!'
+                error = 'Sin errores!'
+                response = JsonResponse({'mensaje':mensaje,'error':error})
+                response.status_code = 201
+                return response
+            else:
+                mensaje = f'{self.model.__name__} no ha podido ser editado!'
+                error = form.errors
+                response = JsonResponse({'mensaje':mensaje,'error':error})
+                response.status_code = 400
+                return response
+        else:
+            redirect('libro:inicio_libros')
+
 
 
 class EliminarLibro(DeleteView):
     model = Libro    
     success_url = reverse_lazy('libro:listar_libros')
+    #queryset = self.model.objects.get(id=pk)
 
-    def post(self,request,pk,*args,**kwargs):
-        libro = Libro.objects.get(id=pk)
-        libro.estado = False
-        libro.save()
-        return redirect('libro:listar_libros')
+    def delete(self,request,*args,**kwargs):
+        if request.is_ajax():
+            libro = self.get_object()
+            libro.estado = False
+            libro.save()
+            mensaje = f'{self.model.__name__} eliminado correctamente!'
+            error = 'No hay error!'
+            response = JsonResponse({'mensaje':mensaje,'error':error})
+            response.status_code = 201
+            return response
+
+    # def post(self,request,pk,*args,**kwargs):
+    #     if request.is_ajax():
+    #         libro = queryset
+    #         # libro = Libro.objects.get(id=pk)
+    #         libro.estado = False
+    #         libro.save()
+    #         return redirect('libro:listar_libros')
 
 
 

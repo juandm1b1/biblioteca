@@ -1,6 +1,7 @@
 from django.urls import path, re_path
-from . import views 
 from django.contrib.auth.decorators import login_required  # Para garantizar logueo antes de mostrar la URL
+from django.views.generic import TemplateView # Para la vista que solo renderiza template
+from . import views
 
 
 urlpatterns = [    
@@ -16,3 +17,10 @@ urlpatterns = [
     path('editar_libro/<int:pk>/', login_required(views.EditarLibro.as_view()), name = 'editar_libro'),
     path('eliminar_libro/<int:pk>/', login_required(views.EliminarLibro.as_view()), name = 'eliminar_libro'),
 ] 
+
+# URLS de vistas "implícitas"
+urlpatterns += [
+    path('inicio_autores/', login_required(TemplateView.as_view(template_name = 'libro/autor/listar_autor.html')), name = 'inicio_autores'),
+    path('inicio_libros/', login_required(TemplateView.as_view(template_name = 'libro/libro/listar_libro.html')), name = 'inicio_libros'),
+    # Se pasa como parámetro al método as_view() el template_name (y los demás necesarios)
+]

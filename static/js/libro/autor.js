@@ -1,6 +1,6 @@
 function listadoAutores() {
     $.ajax({
-        url: "/libro/listado_autor/",
+        url: "/libro/listar_autor/",
         type: "get",
         dataType: "json",
         success: function (response) {
@@ -12,8 +12,8 @@ function listadoAutores() {
                 let fila = '<tr>';
                 fila += '<td>' + (i + 1) + '</td>';
                 fila += '<td>' + response[i]["fields"]['nombre'] + '</td>';
-                fila += '<td>' + response[i]["fields"]['apellidos'] + '</td>';
-                fila += '<td>' + response[i]["fields"]['nacionalidad'] + '</td>';
+                fila += '<td>' + response[i]["fields"]['apellido'] + '</td>';
+                fila += '<td>' + response[i]["fields"]['pais'] + '</td>';
                 fila += '<td>' + response[i]["fields"]['descripcion'] + '</td>';
                 fila += '<td><button type = "button" class = "btn btn-primary btn-sm tableButton"';
                 fila += ' onclick = "abrir_modal_edicion(\'/libro/editar_autor/' + response[i]['pk'] + '/\');"> EDITAR </button>';

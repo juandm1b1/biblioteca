@@ -1,9 +1,10 @@
 function listadoLibros() {
     $.ajax({
-        url: "/libro/listado_libros/",
+        url: "/libro/listar_libros/",
         type: "get",
         dataType: "json",
         success: function (response) {
+            console.log(response);            
             if ($.fn.DataTable.isDataTable('#tabla_libros')) {
                 $('#tabla_libros').DataTable().destroy();
             }
@@ -11,13 +12,19 @@ function listadoLibros() {
             for (let i = 0; i < response.length; i++) {
                 let fila = '<tr>';
                 fila += '<td>' + (i + 1) + '</td>';
-                fila += '<td>' + response[i]["fields"]['titulo'] + '</td>';
-                fila += '<td>' + response[i]["fields"]['fecha_publicacion'] + '</td>';
+                fila += '<td>' + response[i]["fields"]['titulo'] + '</td>';                 
+
                 if (response[i]["fields"]['autor_id'] == ''){
                     fila += '<td>Desconocido</td>';
                 }else{
-                    fila += '<td>' + response[i]["fields"]['autor_id'] + '</td>';       
-                }                
+                    fila += '<td>'+'<ul>';                    
+                    for (let j=0; j<response[i]["fields"]['autor_id'].length; j++){
+                        fila+= '<li>'+response[i]["fields"]['autor_id'][j]+'</li>';                        
+                    }                    
+                    fila += '</ul>'+'</td>';       
+                }
+
+                fila += '<td>' + response[i]["fields"]['fecha_publicacion'] + '</td>';                
                 fila += '<td><button type = "button" class = "btn btn-primary btn-sm tableButton"';
                 fila += ' onclick = "abrir_modal_edicion(\'/libro/editar_libro/' + response[i]['pk'] + '/\');"> EDITAR </button>';
                 fila += '<button type = "button" class = "btn btn-danger tableButton  btn-sm" ';
@@ -97,6 +104,26 @@ function editar() {
         },        
     });
 }
+// function editar() {
+//     activarBoton();    
+//     $.ajax({ 
+//         data: $('#form_edicion').serialize(),       
+//         url: $('#form_edicion').attr('action'),
+//         type: $('#form_edicion').attr('method'),        
+         
+//         success: function (response) {
+//             notificacionSuccess(response.mensaje);
+//             listadoLibros();
+//             cerrar_modal_edicion();
+//         },
+//         error: function (error) {
+//             notificacionError(error.responseJSON.mensaje);
+//             mostrarErroresEdicion(error);
+//             activarBoton();
+//         },        
+//     });
+// }
+
 function eliminar(pk) {
     $.ajax({
         data: {
@@ -117,3 +144,4 @@ function eliminar(pk) {
 $(document).ready(function () {
     listadoLibros();
 });
+

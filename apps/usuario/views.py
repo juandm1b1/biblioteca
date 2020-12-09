@@ -88,10 +88,13 @@ class EditarUsuario(UpdateView):
             form = self.form_class(request.POST, instance = self.get_object())
             if form.is_valid():
                 form.save()
+                mensaje = f'{self.model.__name__} actualizado correctamente!'
+                error = 'Sin errores!'
+                response = JsonResponse({'mensaje':mensaje,'error':error})
+                response.status_code = 201
+                return response
                 # Al pasar como parámetro la instance al form, no es necesario pasar c/atributo como el RegistrarUsuario. Se utiliza
-                # método save() del FormularioUsuario
-                
-                
+                # método save() del FormularioUsuario                
             else:
                 mensaje = f'{self.model.__name__} no se ha podido actualizar!'
                 error = form.errors
