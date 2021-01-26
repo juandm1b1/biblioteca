@@ -1,6 +1,6 @@
 function listadoLibrosReservados() {
     $.ajax({
-        url: "/libro/reservas/",
+        url: "/libro/listado-libros-reservados/",
         type: "get",
         dataType: "json",
         success: function (response) {

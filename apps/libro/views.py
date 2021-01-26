@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect
 from django.core.exceptions import ObjectDoesNotExist
-from django.views.generic import View, TemplateView, ListView, CreateView, UpdateView, DeleteView, FormView
+from django.views.generic import View, TemplateView, ListView, CreateView, UpdateView, DeleteView, FormView, DetailView
 from django.urls import reverse_lazy
 from django.core.serializers import serialize # Importación para 2da forma de obtener JSON para petición AJAX
 from django.http import HttpResponse, JsonResponse
+from django.contrib.auth.mixins import LoginRequiredMixin # 3ra forma de proteger con logueo requerido (decorador en métodos, y login_required() en urls son las otras 2)
 from .forms import AutorForm, LibroForm
-from .models import Autor, Libro
+from .models import Autor, Libro, Reserva
+from apps.usuario.mixins import LoginMixin
 #from .serializers import AutorSerializer, LibroSerializer NO SE USÓ
 
 
@@ -21,12 +23,9 @@ Verifica que método devolvió dispatch y si tiene implementación. De no ser as
 
 """
 
-class Inicio(TemplateView):
-    template_name = 'index.html' 
-
 
  # ListView -> 'Consultar': SELECT * FROM interno. RETORNA UNA LISTA DE OBJETOS, por lo que en el Template se debe llamar como 'object_list'
-class ListadoAutor(View): # Se cambia ListView por View para usar el Método post e INCLUIR EL FORM DE REGISTRO EN EL LISTADO DE AUTORES
+class ListadoAutor(LoginRequiredMixin,View): # Se cambia ListView por View para usar el Método post e INCLUIR EL FORM DE REGISTRO EN EL LISTADO DE AUTORES
     model = Autor
     form_class = AutorForm
     #template_name = 'libro/autor/listar_autor.html'    
@@ -56,7 +55,7 @@ class ListadoAutor(View): # Se cambia ListView por View para usar el Método pos
             return redirect('libro:listar_autor')  
 
 
-class CrearAutor(CreateView): # INSERT
+class CrearAutor(LoginRequiredMixin,CreateView): # INSERT
     model = Autor
     form_class = AutorForm    
     template_name = 'libro/autor/crear_autor.html'    
@@ -79,11 +78,10 @@ class CrearAutor(CreateView): # INSERT
                 response.status_code = 400
                 return response
         else:
-            redirect('libro:inicio_autores')
-        
+            redirect('libro:inicio_autores')        
 
 
-class EditarAutor(UpdateView): # UPDATE
+class EditarAutor(LoginRequiredMixin,UpdateView): # UPDATE
     model = Autor
     form_class = AutorForm    
     template_name = 'libro/autor/editar_autor.html'    
@@ -118,7 +116,8 @@ class EditarAutor(UpdateView): # UPDATE
     En vistas basadas en clases, el parámetro en la url debe ser 'pk' o 'slug', y el form debe ser llamado en el template como 'form'
     """
 
-class EliminarAutor(DeleteView):
+
+class EliminarAutor(LoginRequiredMixin,DeleteView):
     model = Autor    
     success_url = reverse_lazy('libro:listar_autor') # Este se quita porque es para el borrado total   
 
@@ -145,7 +144,7 @@ class EliminarAutor(DeleteView):
     En los template con vistas basadas en clase las instancias de los objetos (ctx) se llaman como 'object'    """
 
 
-class ListadoLibros(View): # Se cambia ListView por View para usar el Método post e INCLUIR EL FORM DE REGISTRO EN EL LISTADO DE LIBROS
+class ListadoLibros(LoginRequiredMixin,View): # Se cambia ListView por View para usar el Método post e INCLUIR EL FORM DE REGISTRO EN EL LISTADO DE LIBROS
     model = Libro
     form_class = LibroForm
     template_name = 'libro/libro/listar_libro.html'    
@@ -180,7 +179,7 @@ class ListadoLibros(View): # Se cambia ListView por View para usar el Método po
             return redirect('libro:listar_libros')
 
 
-class CrearLibro(CreateView): 
+class CrearLibro(LoginRequiredMixin,CreateView): 
     model = Libro
     form_class = LibroForm
     template_name = 'libro/libro/crear_libro.html'
@@ -188,7 +187,7 @@ class CrearLibro(CreateView):
 
     def post(self,request,*args,**kwargs):
         if request.is_ajax():
-            form = self.form_class(request.POST)
+            form = self.form_class(data = request.POST, files = request.FILES)
             if form.is_valid():                
                 form.save()
                 mensaje = f'{self.model.__name__} creado correctamente!'
@@ -206,8 +205,7 @@ class CrearLibro(CreateView):
             redirect('libro:listar_libros')
 
 
-
-class EditarLibro(UpdateView):
+class EditarLibro(LoginRequiredMixin,UpdateView):
     model = Libro
     form_class =LibroForm
     template_name = 'libro/libro/editar_libro.html' # Este template es donde está definido el Modal de edición de libro
@@ -220,7 +218,7 @@ class EditarLibro(UpdateView):
 
     def post(self,request,*args,**kwargs):
         if request.is_ajax():
-            form = self.form_class(request.POST, instance=self.get_object())
+            form = self.form_class(data = request.POST, files = request.FILES, instance=self.get_object()) #SE DEBE AGREGAR 'request.FILES' PARA RECIBIR ARCHIVOS MEDIA
             if form.is_valid():
                 form.save()
                 mensaje = f'{self.model.__name__} editado con éxito!'
@@ -238,8 +236,7 @@ class EditarLibro(UpdateView):
             redirect('libro:inicio_libros')
 
 
-
-class EliminarLibro(DeleteView):
+class EliminarLibro(LoginRequiredMixin,DeleteView):
     model = Libro    
     success_url = reverse_lazy('libro:listar_libros')
     #queryset = self.model.objects.get(id=pk)
@@ -263,17 +260,114 @@ class EliminarLibro(DeleteView):
     #         libro.save()
     #         return redirect('libro:listar_libros')
 
+#-----------
+
+class ListadoLibrosDisponibles(LoginMixin, ListView):
+    model = Libro
+    paginate_by = 6 #Se puede paginar directa/. en ListView
+    template_name = 'libro/libros_disponibles.html'
+
+    def get_queryset(self):
+        queryset = self.model.objects.filter(estado=True, cantidad__gte = 1) #Cantidad mínima mayor o igual que 1
+        return queryset
+
+# Con DetailView, con sólo poner el pk en la URL, ya sabe automática/. que con ese se crea el detalle
+class DetalleLibroDisponible(LoginMixin, DetailView):
+    model = Libro
+    template_name = 'libro/detalle_libro_disponible.html'
+
+    def get(self, request, *args, **kwargs):
+        if self.get_object().cantidad > 0:
+            return render(request, self.template_name, {'object':self.get_object()}) # Para no redefinir el context_data se pasa como ctx: 'object':self.get_object()
+        return redirect('libro:listar_libros_disponibles')
+    # # Lo siguiente es lo que have internamente DetailView:
+
+    # def get_object(self):
+    #     try:
+    #         instance = self.model.objects.get(id = self.kwargs['pk'])  # Hace consulta con el pk de los kwargs de la instancia, pasado desde la URL
+    #     except expression as identifier:
+    #         pass        
+    #     return instance
+    
+    # def get_context_data(self, **kwargs):
+    #     context = {}
+    #     context['object'] = self.get_object
+    #     return context
+
+    # def get(self, request, *args, **kwargs):
+    #     return render(request, self.template_name, self.get_context_data())
+    
+
+class RegistrarReserva(LoginMixin, CreateView):
+    model = Reserva
+    success_url = reverse_lazy('libro:listar_libros_disponibles')
+
+    def post(self,request,*args,**kwargs):
+        if request.is_ajax():
+            #print(request.POST)
+            libro = Libro.objects.filter(id = request.POST.get('libro')).first()
+            usuario = request.user
+            print(libro.estado)
+            print(libro.cantidad)
+            if libro.cantidad > 0 and usuario:                
+                self.model.objects.create(libro = libro, usuario = usuario)
+                #Otra opción de registro:
+                # nueva_reserva = self.model(libro = libro, usuario = usuario)
+                # nueva_reserva.save()
+                #La reducción -y aumento- de la cantidad del libro se hace como signal en models, para que afecte tanto views como el admin:
+                # libro.cantidad -= libro.cantidad
+                # if libro.cantidad <= 0:
+                #     libro.estado = False
+                #     libro.save()
+                mensaje = f'{self.model.__name__} registrada correctamente!'
+                error = 'No hay error!'
+                response = JsonResponse({'mensaje':mensaje,'error':error, 'url':self.success_url}) # Se agregar url para redireccionar desde JS
+                response.status_code = 201
+                return response  
+            else:
+                mensaje = f'{self.model.__name__} no se ha podido crear!'
+                error = 'Libro no disponible'
+                response = JsonResponse({'mensaje':mensaje,'error':error})
+                response.status_code = 400
+                print(response)
+                return response      
+        return redirect('libro:listar_libros_disponibles')
 
 
+class ListadoLibrosReservados(LoginMixin, ListView):
+    # ¿Si se implementa un booleano en el modelo Libro para indicar si está reservado o no?
+    # No funciona porque pueden haber vario ejemplares!!
+    model = Reserva    
+    template_name = 'libro/libros_reservados.html'
+
+    def get_queryset(self):
+        queryset = self.model.objects.filter(estado=True, usuario = self.request.user) #Cantidad mínima mayor o igual que 1
+        return queryset
+
+    def get(self,request,*args,**kwargs):
+        if request.is_ajax():
+            qs = self.get_queryset()            
+            data = serialize('json', qs, use_natural_foreign_keys=True) # 'use_natural_foreign_keys' permite ver otros atributos de ForeignKeys o ManyToManyFields diderentes al id          
+            return HttpResponse(data,'application/json')
+        else:
+            return redirect('libro:inicio_libros')
 
 
+class ListadoReservasVencidas(LoginMixin, ListView):
+    model = Reserva    
+    template_name = 'libro/reservas_vencidas.html'
 
+    def get_queryset(self):
+        queryset = self.model.objects.filter(estado=False, usuario = self.request.user) #Cantidad mínima mayor o igual que 1
+        return queryset
 
-
-
-
-
-
+    # def get(self,request,*args,**kwargs):
+    #     if request.is_ajax():
+    #         qs = self.get_queryset()            
+    #         data = serialize('json', qs, use_natural_foreign_keys=True) # 'use_natural_foreign_keys' permite ver otros atributos de ForeignKeys o ManyToManyFields diderentes al id          
+    #         return HttpResponse(data,'application/json')
+    #     else:
+    #         return redirect('libro:inicio_libros')
 
 # -------------CON FUNCIONES y opciones no ideales con Views-------------------------------------------------
 

@@ -8,7 +8,7 @@
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
-        <!-- 'object' viene ya definido del método get_object(), que se ejecuta automáticamente en UpdateView -->
+        <!-- 'object' viene ya definido del método get_object(), que se ejecuta automáticamente en UpdateView. enctype="multipart/form-data" es necesario para archivos Media -->
         <form id="form_edicion"  action="{% url 'libro:editar_libro' object.id %}" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="modal-body">

@@ -84,6 +84,8 @@ function registrar() {
 }
 function editar() {
     activarBoton();
+    //ESTE CÓDIGO SUSTITUYE LA FUNCIÓN EDITAR COMENTADA ABAJO PARA PODER TRABAJAR CON ARCHIVOS MEDIA: IMÁGENES, DOCUMENTOS
+    // la var data, y dentro de .ajax: data,cache,processData y contentType son necesarios para trabajar con archivos media
     var data = new FormData($('#form_edicion').get(0));
     $.ajax({        
         url: $('#form_edicion').attr('action'),

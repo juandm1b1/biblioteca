@@ -38,12 +38,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'apps.libro',
-    'apps.usuario',
+    'import_export',
     #'rest_framework',
+    'apps.libro',
+    'apps.usuario',    
 ]
 
 MIDDLEWARE = [
+    'apps.usuario.middleware.ValidarReservasMiddleware', # Middleware personalizado
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -112,7 +114,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-""" Lo siguiente se agregar para indicar el uso de la creación y autenticación de usuario personalizada en models.py de
+
+""" Lo siguiente se agrega para indicar el uso de la creación y autenticación de usuario personalizada en models.py de
     la app usuario:
 """
 AUTH_USER_MODEL = 'usuario.Usuario' # Nombre_app.nombre_modelo
@@ -142,3 +145,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR,'static'),)
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR,'media')

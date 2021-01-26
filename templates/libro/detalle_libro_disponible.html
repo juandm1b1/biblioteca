@@ -1,7 +1,7 @@
 {% extends 'index.html' %}
-{% load staticfiles %}
+{% load static %}
 {% block titulo %}
-Biblioteca.dev | {{ object }}
+Biblioteca JDMB | {{ object }}
 {% endblock titulo %}
 {% block extra_css %}
 {% endblock extra_css %}
@@ -20,13 +20,18 @@ Biblioteca.dev | {{ object }}
             <div class="row">
                 <div class="card">
                     {% csrf_token %}
-                    <img class="card-img-top" src="{{ object.imagen.url }}" alt="Card image cap">
+                    {% if libro.imagen %}
+                    <img class="card-img-top" src="{{ libro.imagen.url }}" alt="Card image cap">
+                    {% else %}
+                    <img class="card-img-top" src="/media/libros/imagen-no-disponible.webp/"  alt="Card image cap">
+                    {% endif %}                    
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
                                 <p class="card-text">Publicado el: {{ object.fecha_publicacion }}</p>
                             </div>
                             <div class="col-md-6">
+                                <!-- obtener_autores hace referencia a una función que se encuentra en el modelo -->
                                 <p class="card-text"><strong>Autores</strong></p>{{ object.obtener_autores }}
                             </div>
                             <div class="col-md-12">
@@ -39,7 +44,7 @@ Biblioteca.dev | {{ object }}
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <button type="button" class="btn btn-primary btn-lg" onclick="registrarReserva();">RESERVAR ESTE LIBRO</button>
+                    <button type="button" class="btn btn-primary btn-lg" onclick="registrarReserva();" >RESERVAR ESTE LIBRO</button> <!--  -->
                 </div>
             </div>
         </div>
@@ -63,7 +68,7 @@ Biblioteca.dev | {{ object }}
             type: 'POST',
             success:function(response){
                 notificacionSuccess(response.mensaje);
-                window.location.href = response.url;
+                window.location.href = response.url; //Esta url fue definida en la view, y se agrega para redireccionar desde JS
             },
             error:function(error){
                 notificacionError(error.responseJSON.mensaje);

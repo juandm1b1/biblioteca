@@ -1,7 +1,7 @@
 {% extends 'index.html' %}
-{% load staticfiles %}
+{% load static %}
 {% block titulo %}
-Biblioteca.dev | Listado de Reservas Vencidas
+Biblioteca JDMB | Listado de Reservas Vencidas
 {% endblock titulo %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/lib/datatable/dataTables.bootstrap.min.css' %}">
@@ -26,11 +26,15 @@ Biblioteca.dev | Listado de Reservas Vencidas
                 </tr>
             </thead>
             <tbody>
+                <!-- % for reserva in object_list %
+                <td> reserva.id </td>
+                <td> reserva.libro </td>
+                <td> reserva.fecha_creacion </td>
+                % endfor % -->
             </tbody>
         </table>
     </div>
 </div>
-
 
 {% endblock body %}
 {% block extrajs %}

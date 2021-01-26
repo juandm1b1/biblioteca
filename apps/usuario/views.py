@@ -9,6 +9,8 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth import login, logout
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin # 'PermissionRequiredMixin': Para indicar que requiere permiso(s)
+from apps.usuario.mixins import LoginYUsuarioStaffMixin, ValidarPermisosMixin # Se importan los Mixin personalizados.
 from apps.usuario.models import Usuario
 from apps.usuario.forms import FormularioLogin, FormularioUsuario
 
@@ -28,7 +30,7 @@ class Login(FormView):
 
     
     def form_valid(self, form):
-        login(self.request, form.get_user()) # Que con datos que se pasan en el formluario se inicie una sesión
+        login(self.request, form.get_user()) # Que con datos que se pasan en el formulario se inicie una sesión
         return super(Login, self).form_valid(form)
 
 
@@ -37,8 +39,14 @@ def logoutUsuario(request):
     return HttpResponseRedirect('/accounts/login/')
 
 
+class Inicio(LoginRequiredMixin,TemplateView):
+    template_name = 'index.html' 
 
-class RegistrarUsuario(CreateView):
+
+
+
+class RegistrarUsuario(LoginYUsuarioStaffMixin,ValidarPermisosMixin,CreateView):
+    permission_required = ('usuario.view_usuario','usuario.add_usuario','usuario.change_usuario','usuario.delete_usuario')
     model = Usuario
     form_class = FormularioUsuario
     template_name = 'usuarios/crear_usuario.html'
@@ -76,7 +84,8 @@ class RegistrarUsuario(CreateView):
             redirect('usuarios:inicio_usuarios')
 
 
-class EditarUsuario(UpdateView):
+class EditarUsuario(LoginYUsuarioStaffMixin,ValidarPermisosMixin,UpdateView):
+    permission_required = ('usuario.view_usuario','usuario.add_usuario','usuario.change_usuario','usuario.delete_usuario')
     model = Usuario
     form_class = FormularioUsuario
     template_name = 'usuarios/editar_usuario.html'
@@ -105,7 +114,8 @@ class EditarUsuario(UpdateView):
             redirect('usuarios:inicio_usuarios')
 
 
-class EliminarUsuario(DeleteView):
+class EliminarUsuario(LoginYUsuarioStaffMixin,ValidarPermisosMixin,DeleteView):
+    permission_required = ('usuario.view_usuario','usuario.add_usuario','usuario.change_usuario','usuario.delete_usuario')
     model = Usuario
     template_name = 'usuarios/eliminar_usuario.html'
 
@@ -113,7 +123,7 @@ class EliminarUsuario(DeleteView):
     def delete(self,request,*args,**kwargs): # Método HTTP Delete   
         if request.is_ajax():
             usuario = self.get_object()
-            usuario.usuario_activo = False
+            usuario.is_active = False
             usuario.save()
             mensaje = f'{self.model.__name__} eliminado correctamente!'
             error = 'No hay error!'
@@ -131,13 +141,31 @@ Al ser una vista sin codigo añadido o métodos sobreescritos, se puede 'crear'/
 class InicioListarUsuario(TemplateView): 
     template_name = 'usuarios/listar_usuario.html'
 
+Se vuelve a traer a views.py para APLICARLE EL MIXIN
 """
-class ListarUsuario(ListView):
+
+class InicioUsuarios(LoginYUsuarioStaffMixin,ValidarPermisosMixin,TemplateView):
+    """ Jerarquía de Herencia InicioUsuarios:
+    1. LoginRequiredMixin: Se verifica que haya iniciado sesión
+    2. SuperusuarioMixin: Se verifica si es Superusuario
+    3. TemplateView: Si pasa los 2 primeros requerimientos, se renderiza el template 
+    En 'LoginYSuperUsuarioMixin' están incluidos los 2 primeros pasos.
+    'PermissionRequiredMixin' agrega la validación de que tenga los permisos que se le indiquen antes de pasar a las acciones del TemplateView.
+    Se debe agregar variable 'permission_required' para indicar los permisos que se quiere que valide. sI SON VARIOS SE ESCRIBE COMO TUPLA ('', '',...)
+    Los datos de los permisos se pueden sacar desde el Admin: 'Tipo_de_Contenido.Nombre:en_Código'
+    ** La línea de 'permission_required' se pasa a mixins.py para generalizarla a todas las vistas que hereden de ValidarPermisosRequeridosMixin
+    """
+    permission_required = ('usuario.view_usuario','usuario.add_usuario','usuario.change_usuario','usuario.delete_usuario')
+    template_name = 'usuarios/listar_usuario.html'
+
+
+class ListarUsuario(LoginYUsuarioStaffMixin,ValidarPermisosMixin,ListView):
+    permission_required = ('usuario.view_usuario','usuario.add_usuario','usuario.change_usuario','usuario.delete_usuario')
     model = Usuario
     #template_name = 'usuarios/listar_usuario.html' # Esto se pasa a 'InicioListarUsuario'
 
     def get_queryset(self):
-        return self.model.objects.filter(usuario_activo=True)
+        return self.model.objects.filter(is_active=True)
 
 
     """ 2. Segunda forma de obtener JSON para la petición AJAX:
@@ -154,7 +182,7 @@ class ListarUsuario(ListView):
         if request.is_ajax(): # is_ajax(): Función integrada en Django            
             
             data = serialize('json', self.get_queryset()) # Para convertir a JSON la lista de usuarios; solo hay que usar el método serialize indicando el tipo de archivo y la consulta
-            #print(self.kwargs) # Por ser diccionario los parámetros exta en el path de urls.py, viene en los Kwargs
+            #print(self.kwargs) # Por ser diccionario los parámetros extra en el path de urls.py, viene en los Kwargs
             return HttpResponse(data,'application/json') # Se retorna como HttpResponse e indicar que es 'application/json'
 
         else:

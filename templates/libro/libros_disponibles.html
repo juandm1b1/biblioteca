@@ -1,5 +1,5 @@
 {% extends 'index.html' %}
-{% load staticfiles %}
+{% load static %}
 {% block titulo %}
 Biblioteca JDMB | Listado de Libros Disponibles
 {% endblock titulo %}
@@ -22,7 +22,11 @@ Biblioteca JDMB | Listado de Libros Disponibles
                 <div class="col-md-4">
                     <a href="{% url 'libro:detalle_libro' libro.id %}">
                         <div class="card">
+                            {% if libro.imagen %}
                             <img class="card-img-top" src="{{ libro.imagen.url }}" alt="Card image cap">
+                            {% else %}
+                            <img class="card-img-top" src="/media/libros/imagen-no-disponible.webp/"  alt="Card image cap">
+                            {% endif %}
                             <div class="card-body">
                                 <h4 class="card-title mb-3">{{ libro.titulo }}</h4>
                                 <p class="card-text">{{ libro.descripcion }}</p>

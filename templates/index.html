@@ -31,16 +31,14 @@
                         <a href="{% url 'index' %}"><i class="menu-icon fa fa-laptop"></i>Inicio</a>
                     </li>
 
-                    {% if request.user.is_staff %} <!-- Si es True el return de método is_staff(), definido en el modelo Usuario -->
+                    {% if request.user.is_superuser %} <!-- Si es True el return de método is_staff(), definido en el modelo Usuario -->
                     <li class="menu-item-has-children dropdown">
                         <a href="" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i
                                 class="menu-icon fa fa-users"></i>Usuarios</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="fa fa-table"></i><a href="{% url 'usuarios:inicio_usuarios' %}">Listado de Usuarios</a></li>                            
                         </ul>                        
-                    </li>
-                    {% endif %}
-                    
+                    </li>                   
                     <li class="menu-item-has-children dropdown">
                        <a href="" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fa fa-users"></i>Autores</a>
                        <ul class="sub-menu children dropdown-menu">
@@ -53,13 +51,15 @@
                            <li><i class="fa fa-table"></i><a href="{% url 'libro:listar_libros' %}">Listado de Libros</a></li>
                        </ul>
                     </li> 
+                    {% endif %}
+
                     {% if request.user.is_staff %}
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fa fa-book"></i>Libros</a>
                         <ul class="sub-menu children dropdown-menu">                            
-                            <li><i class="fa fa-table"></i><a href="#">Listado de Libros Disponibles</a></li>
-                            <li><i class="fa fa-table"></i><a href="#">Listado de Libros Reservados</a>
-                            </li><i class="fa fa-table"></i><a href="#">Reservas Vencidas</a>
+                            <li><i class="fa fa-table"></i><a href="{% url 'libro:listar_libros_disponibles' %}">Listado de Libros Disponibles</a></li>
+                            <li><i class="fa fa-table"></i><a href="{% url 'libro:listar_libros_reservados' %}">Listado de Libros Reservados</a>
+                            </li><i class="fa fa-table"></i><a onclick="listadoReservasVencidas()" href="{% url 'libro:listar_reservas_vencidas' %}">Reservas Vencidas</a>
                             </li>
                         </ul>
                     </li>
@@ -143,12 +143,13 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script> <!-- este es el script de SweetAlert -->
     <script src="{% static 'js/main.js' %}"></script>
     <script>
-        {% if messages %}
+        // MUY IMPORTANTE!!!!!!! --> SÍ FUNCIONA MOTOR DE PLANTILLAS DENTRO DE CÖDIGO JAVASCRIPT
+        {% if messages %}              
             var html_mensaje = '';
             {% for mensaje in messages %}
-                html_mensaje += '{{ mensaje }}';
+                html_mensaje += '{{ mensaje }}';                  
             {% endfor %}
-            notificacionError(html_mensaje);
+            notificacionError(html_mensaje); // Este método esta en main.js
         {% endif %}
     </script>
     {% block extrajs %}

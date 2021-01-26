@@ -1,6 +1,6 @@
-function listadoLibrosReservados() {
+function listadoReservasVencidas() {
     $.ajax({
-        url: "/libro/reservas-vencidas/",
+        url: "/libro/listado-reservas-vencidas/",
         type: "get",
         dataType: "json",
         success: function (response) {
@@ -45,5 +45,5 @@ function listadoLibrosReservados() {
     });
 }
 $(document).ready(function () {
-    listadoLibrosReservados();
+    listadoReservasVencidas();
 });

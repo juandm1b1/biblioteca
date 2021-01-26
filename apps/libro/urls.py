@@ -16,6 +16,13 @@ urlpatterns = [
     path('crear_libro/', login_required(views.CrearLibro.as_view()), name = 'crear_libro'),
     path('editar_libro/<int:pk>/', login_required(views.EditarLibro.as_view()), name = 'editar_libro'),
     path('eliminar_libro/<int:pk>/', login_required(views.EliminarLibro.as_view()), name = 'eliminar_libro'),
+
+    # Algunos navegadores interpretan el '_' como una URL no amigable, por eso se cambia por '-', ya que estas son URL's  más públicas
+    path('listado-libros-disponibles/', views.ListadoLibrosDisponibles.as_view(), name = 'listar_libros_disponibles'),
+    path('detalle-libro/<int:pk>/', views.DetalleLibroDisponible.as_view(), name='detalle_libro'),
+    path('reservar-libro/', views.RegistrarReserva.as_view(), name='reservar_libro'),
+    path('listado-libros-reservados/', views.ListadoLibrosReservados.as_view(), name = 'listar_libros_reservados'),
+    path('listado-reservas-vencidas/', views.ListadoReservasVencidas.as_view(), name = 'listar_reservas_vencidas'),
 ] 
 
 # URLS de vistas "implícitas"
